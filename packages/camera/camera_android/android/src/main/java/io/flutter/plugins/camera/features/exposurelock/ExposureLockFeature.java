@@ -5,6 +5,7 @@
 package io.flutter.plugins.camera.features.exposurelock;
 
 import android.annotation.SuppressLint;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import androidx.annotation.NonNull;
 import io.flutter.plugins.camera.CameraProperties;
@@ -51,6 +52,15 @@ public class ExposureLockFeature extends CameraFeature<ExposureMode> {
   public void updateBuilder(@NonNull CaptureRequest.Builder requestBuilder) {
     if (!checkIsSupported()) {
       return;
+    }
+
+    if (currentSetting == ExposureMode.locked) {
+      requestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+      requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
+      requestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)256);
+      return;
+    } else {
+      requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
     }
 
     requestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, currentSetting == ExposureMode.locked);
