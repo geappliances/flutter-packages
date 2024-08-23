@@ -57,7 +57,7 @@ public class ExposureLockFeature extends CameraFeature<ExposureMode> {
     if (currentSetting == ExposureMode.locked) {
       requestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
       requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
-      requestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)256);
+      requestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)128);
       return;
     } else {
       requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
