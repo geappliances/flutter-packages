@@ -50,6 +50,8 @@ buildFeatures {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    buildFeatures { buildConfig = true } 
+
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
