@@ -29,7 +29,7 @@ dependencies:
     git:
       url: https://github.com/geappliances/flutter-packages.git
       path: packages/camera/camera_android
-      ref: 94f60c5
+      ref: GeaCamera
 
   camera_avfoundation: ^0.9.13
   camera_platform_interface: ^2.5.0
