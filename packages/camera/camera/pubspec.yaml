@@ -22,14 +22,14 @@ flutter:
         default_package: camera_web
 
 dependencies:
-  # camera_android: ^0.10.7  
+  # camera_android: ^0.10.7
   # camera_android:
   #   path: ../camera_android
   camera_android:
     git:
       url: https://github.com/geappliances/flutter-packages.git
       path: packages/camera/camera_android
-      ref: GeaCamera
+      ref: GeaCamera-PluginRegistryFix
 
   camera_avfoundation: ^0.9.13
   camera_platform_interface: ^2.5.0
