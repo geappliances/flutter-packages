@@ -22,7 +22,7 @@ flutter:
         default_package: camera_web
 
 dependencies:
-  # camera_android: ^0.10.7  
+  # camera_android: ^0.10.7
   # camera_android:
   #   path: ../camera_android
   camera_android:
