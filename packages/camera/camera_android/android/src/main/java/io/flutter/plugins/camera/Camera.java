@@ -552,7 +552,7 @@ class Camera
 
     flutterResult = result;
 
-    // Create temporary file.
+    // Create a temporary file to store the captured image.
     final File outputDir = applicationContext.getCacheDir();
     try {
       captureFile = File.createTempFile("CAP", ".jpg", outputDir);
@@ -561,15 +561,32 @@ class Camera
       dartMessenger.error(flutterResult, "cannotCreateFile", e.getMessage(), null);
       return;
     }
-
-    // Listen for picture being taken.
-    pictureImageReader.setOnImageAvailableListener(this, backgroundHandler);
-
+  
+    // Safely set the image listener.
+    // Handle cases where pictureImageReader might be null due to native camera service issues.
+    try {
+      if (pictureImageReader == null) {
+        dartMessenger.sendCameraErrorEvent("Camera internal error: pictureImageReader is null.");
+        flutterResult.error("cameraError", "pictureImageReader is null", null);
+        return;
+      }
+      pictureImageReader.setOnImageAvailableListener(this, backgroundHandler);
+    } catch (Exception e) {
+      String msg = (e.getMessage() == null)
+          ? "Exception while setting image listener"
+          : e.getMessage();
+      dartMessenger.sendCameraErrorEvent(msg);
+      flutterResult.error("cameraError", msg, null);
+      return;
+    }
+  
+    // Perform autofocus if supported and set to auto mode.
     final AutoFocusFeature autoFocusFeature = cameraFeatures.getAutoFocus();
     final boolean isAutoFocusSupported = autoFocusFeature.checkIsSupported();
     if (isAutoFocusSupported && autoFocusFeature.getValue() == FocusMode.auto) {
       runPictureAutoFocus();
     } else {
+      // If autofocus is not used, proceed directly to precapture sequence.
       runPrecaptureSequence();
     }
   }
