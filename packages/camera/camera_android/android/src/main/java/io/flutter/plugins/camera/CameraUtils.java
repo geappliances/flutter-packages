@@ -95,39 +95,56 @@ public final class CameraUtils {
   @NonNull
   public static List<Map<String, Object>> getAvailableCameras(@NonNull Activity activity)
       throws CameraAccessException {
+    // Get the system camera service.
     CameraManager cameraManager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
+    // Retrieve the list of available camera IDs as strings.
     String[] cameraNames = cameraManager.getCameraIdList();
+    // Will store the details of the first valid camera.
     List<Map<String, Object>> cameras = new ArrayList<>();
+
     for (String cameraName : cameraNames) {
-      int cameraId;
+      Log.i("CameraUtils", "Checking camera ID: " + cameraName);
+
       try {
-        cameraId = Integer.parseInt(cameraName, 10);
-      } catch (NumberFormatException e) {
-        cameraId = -1;
-      }
-      if (cameraId < 0) {
+        // Attempt to get camera characteristics.
+        // If this throws an exception, the camera is not usable (e.g. disconnected or invalid ID).
+        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraName);
+
+        // If we reached here, the camera is valid.
+        HashMap<String, Object> details = new HashMap<>();
+        details.put("name", cameraName);
+
+        int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+        details.put("sensorOrientation", sensorOrientation);
+
+        // Determine the lens facing direction (front/back/external)
+        Integer lensFacing = characteristics.get(CameraCharacteristics.LENS_FACING);
+        if (lensFacing != null) {
+          switch (lensFacing) {
+            case CameraMetadata.LENS_FACING_FRONT:
+              details.put("lensFacing", "front");
+              break;
+            case CameraMetadata.LENS_FACING_BACK:
+              details.put("lensFacing", "back");
+              break;
+            case CameraMetadata.LENS_FACING_EXTERNAL:
+              details.put("lensFacing", "external");
+              break;
+            default:
+              details.put("lensFacing", "unknown");
+          }
+        }
+
+        Log.i("CameraUtils", "Found usable camera ID: " + cameraName);
+        cameras.add(details);
+
+        // Only return the first available/valid camera.
+        break;
+      } catch (IllegalArgumentException | CameraAccessException e) {
+        // If the camera ID is no longer valid, skip it and check the next one.
+        Log.w("CameraUtils", "Skipping invalid camera ID: " + cameraName + " (" + e.getMessage() + ")");
         continue;
       }
-
-      HashMap<String, Object> details = new HashMap<>();
-      CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraName);
-      details.put("name", cameraName);
-      int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-      details.put("sensorOrientation", sensorOrientation);
-
-      int lensFacing = characteristics.get(CameraCharacteristics.LENS_FACING);
-      switch (lensFacing) {
-        case CameraMetadata.LENS_FACING_FRONT:
-          details.put("lensFacing", "front");
-          break;
-        case CameraMetadata.LENS_FACING_BACK:
-          details.put("lensFacing", "back");
-          break;
-        case CameraMetadata.LENS_FACING_EXTERNAL:
-          details.put("lensFacing", "external");
-          break;
-      }
-      cameras.add(details);
     }
     return cameras;
   }
