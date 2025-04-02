@@ -265,11 +265,7 @@ class CameraController extends ValueNotifier<CameraValue> {
 
   bool _isDisposed = false;
   StreamSubscription<CameraImageData>? _imageStreamSubscription;
-
-  // A Future awaiting an attempt to initialize (e.g. after `initialize` was
-  // just called). If the controller has not been initialized at least once,
-  // this value is null.
-  Future<void>? _initializeFuture;
+  FutureOr<bool>? _initCalled;
   StreamSubscription<DeviceOrientationChangedEvent>?
       _deviceOrientationSubscription;
 
@@ -298,15 +294,11 @@ class CameraController extends ValueNotifier<CameraValue> {
         'initialize was called on a disposed CameraController',
       );
     }
-
-    final Completer<void> initializeCompleter = Completer<void>();
-    _initializeFuture = initializeCompleter.future;
-
     try {
       final Completer<CameraInitializedEvent> initializeCompleter =
           Completer<CameraInitializedEvent>();
 
-      _deviceOrientationSubscription ??= CameraPlatform.instance
+      _deviceOrientationSubscription = CameraPlatform.instance
           .onDeviceOrientationChanged()
           .listen((DeviceOrientationChangedEvent event) {
         value = value.copyWith(
@@ -351,9 +343,9 @@ class CameraController extends ValueNotifier<CameraValue> {
       );
     } on PlatformException catch (e) {
       throw CameraException(e.code, e.message);
-    } finally {
-      initializeCompleter.complete();
     }
+
+    _initCalled = true;
   }
 
   /// Prepare the capture session for video recording.
@@ -373,7 +365,7 @@ class CameraController extends ValueNotifier<CameraValue> {
 
   /// Pauses the current camera preview
   Future<void> pausePreview() async {
-    if (value.isPreviewPaused || !value.isInitialized || _isDisposed) {
+    if (value.isPreviewPaused) {
       return;
     }
     try {
@@ -410,11 +402,6 @@ class CameraController extends ValueNotifier<CameraValue> {
       await CameraPlatform.instance.setDescriptionWhileRecording(description);
       value = value.copyWith(description: description);
     } else {
-      if (_initializeFuture != null) {
-        await _initializeFuture;
-        await CameraPlatform.instance.dispose(_cameraId);
-      }
-
       await _initializeWithDescription(description);
     }
   }
@@ -854,8 +841,8 @@ class CameraController extends ValueNotifier<CameraValue> {
     _unawaited(_deviceOrientationSubscription?.cancel());
     _isDisposed = true;
     super.dispose();
-    if (_initializeFuture != null) {
-      await _initializeFuture;
+    if (_initCalled != null) {
+      await _initCalled;
       await CameraPlatform.instance.dispose(_cameraId);
     }
   }
