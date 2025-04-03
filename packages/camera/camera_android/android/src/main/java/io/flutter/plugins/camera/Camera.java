@@ -346,11 +346,13 @@ class Camera
           @Override
           public void onClosed(@NonNull CameraDevice camera) {
             Log.i(TAG, "open | onClosed");
-
-            // Prevents calls to methods that would otherwise result in IllegalStateException
-            // exceptions.
             cameraDevice = null;
-            closeCaptureSession();
+
+            try {
+              closeCaptureSession();
+            } catch (Exception e) {
+              Log.e(TAG, "Exception during closeCaptureSession in onClosed", e);
+            }
             dartMessenger.sendCameraClosingEvent();
           }
 
@@ -1301,11 +1303,21 @@ class Camera
   }
 
   void closeCaptureSession() {
-    if (captureSession != null) {
-      Log.i(TAG, "closeCaptureSession");
+    // Make a copy to avoid race conditions with async callbacks
+    CameraCaptureSession session = captureSession;
+    // Nullify shared reference before closing to avoid reuse
+    captureSession = null;
 
-      captureSession.close();
-      captureSession = null;
+    // Defensive null check
+    if (session != null) {
+      try {
+        Log.i(TAG, "closeCaptureSession");
+        session.close();
+      } catch (Exception e) {
+        Log.e(TAG, "Error closing captureSession", e);
+      }
+    } else {
+      Log.w(TAG, "Attempted to close a null captureSession");
     }
   }
 
