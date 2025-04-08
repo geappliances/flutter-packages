@@ -1301,23 +1301,23 @@ class Camera
 
     imageStreamReader.subscribeListener(this.captureProps, imageStreamSink, backgroundHandler);
   }
+  private final Object captureSessionLock = new Object();
 
   void closeCaptureSession() {
-    // Make a copy to avoid race conditions with async callbacks
-    CameraCaptureSession session = captureSession;
-    // Nullify shared reference before closing to avoid reuse
-    captureSession = null;
-
-    // Defensive null check
-    if (session != null) {
-      try {
-        Log.i(TAG, "closeCaptureSession");
-        session.close();
-      } catch (Exception e) {
-        Log.e(TAG, "Error closing captureSession", e);
+    synchronized (captureSessionLock) {
+      CameraCaptureSession session = captureSession;
+      captureSession = null;
+  
+      if (session != null) {
+        try {
+          Log.i(TAG, "closeCaptureSession");
+          session.close();
+        } catch (Exception e) {
+          Log.e(TAG, "Error closing captureSession", e);
+        }
+      } else {
+        Log.w(TAG, "Attempted to close a null captureSession");
       }
-    } else {
-      Log.w(TAG, "Attempted to close a null captureSession");
     }
   }
 
