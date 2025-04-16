@@ -10,6 +10,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import java.util.ArrayList;
