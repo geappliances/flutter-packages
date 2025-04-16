@@ -348,11 +348,6 @@ class Camera
             Log.i(TAG, "open | onClosed");
             cameraDevice = null;
 
-            try {
-              closeCaptureSession();
-            } catch (Exception e) {
-              Log.e(TAG, "Exception during closeCaptureSession in onClosed", e);
-            }
             dartMessenger.sendCameraClosingEvent();
           }
 
