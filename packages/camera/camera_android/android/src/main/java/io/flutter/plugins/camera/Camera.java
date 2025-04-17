@@ -853,7 +853,7 @@ class Camera
     try {
       startCapture(true, imageStreamChannel != null);
       result.success(null);
-    } catch (CameraAccessException e) {
+    } catch (Exception e) {
       recordingVideo = false;
       captureFile = null;
       result.error("videoRecordingFailed", e.getMessage(), null);
