@@ -169,6 +169,20 @@ final class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
           }
           break;
         }
+      case "setExposureTime":
+        {
+          Integer exposureValue = call.argument("exposureValue");
+          if (exposureValue == null) {
+            result.error("invalidArgument", "Missing exposureValue", null);
+            return;
+          }
+          try {
+            camera.setExposureTime(result, exposureValue);
+          } catch (Exception e) {
+            handleException(e, result);
+          }
+          break;
+        }
       case "setExposurePoint":
         {
           Boolean reset = call.argument("reset");

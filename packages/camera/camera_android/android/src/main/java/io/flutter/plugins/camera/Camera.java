@@ -972,6 +972,28 @@ class Camera
   }
 
   /**
+   * Method handler for setting manual sensor exposure time.
+   *
+   * @param result Flutter result.
+   * @param exposureValue Custom exposure value mapped to v4l2 ctrl (unit is NOT nanoseconds).
+   */
+  public void setExposureTime(@NonNull final Result result, int exposureValue) {
+    Log.d("CustomCamera", "Setting exposure to: " + exposureValue);
+    try {
+      previewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+      previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+      previewRequestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long) exposureValue);
+      captureSession.capture(previewRequestBuilder.build(), null, backgroundHandler);
+      refreshPreviewCaptureSession(
+          () -> result.success(null),
+          (code, message) ->
+              result.error("setExposureTimeFailed", "Could not set exposure time.", null));
+    } catch (Exception e) {
+      result.error("setExposureTimeFailed", e.getMessage(), null);
+    }
+  }
+
+  /**
    * Sets new exposure point from dart.
    *
    * @param result Flutter result.
