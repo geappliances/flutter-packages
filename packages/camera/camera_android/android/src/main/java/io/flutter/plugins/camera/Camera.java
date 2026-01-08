@@ -195,6 +195,8 @@ class Camera
       final ResolutionPreset resolutionPreset,
       final boolean enableAudio) {
 
+    Log.i(TAG, "Camera constructor called");
+
     if (activity == null) {
       throw new IllegalStateException("No activity available!");
     }
@@ -585,7 +587,7 @@ class Camera
       dartMessenger.error(flutterResult, "cannotCreateFile", e.getMessage(), null);
       return;
     }
-  
+
     // Safely set the image listener.
     // Handle cases where pictureImageReader might be null due to native camera service issues.
     try {
@@ -603,7 +605,7 @@ class Camera
       flutterResult.error("cameraError", msg, null);
       return;
     }
-  
+
     // Perform autofocus if supported and set to auto mode.
     final AutoFocusFeature autoFocusFeature = cameraFeatures.getAutoFocus();
     final boolean isAutoFocusSupported = autoFocusFeature.checkIsSupported();
@@ -747,6 +749,7 @@ class Camera
   /** Stops the background thread and its {@link Handler}. */
   public void stopBackgroundThread() {
     if (backgroundHandlerThread != null) {
+      Log.i(TAG, "stopping background thread");
       backgroundHandlerThread.quitSafely();
     }
     backgroundHandlerThread = null;
@@ -1231,6 +1234,10 @@ class Camera
     Log.i(TAG, "onImageAvailable");
 
     backgroundHandler.post(
+
+      // this the crash is in the reader.acquireNextImage() line, check for null reader
+       () ->
+      Log.i(TAG, "camerabackground: start image saver task");
         new ImageSaver(
             // Use acquireNextImage since image reader is only for one image.
             reader.acquireNextImage(),
@@ -1238,11 +1245,13 @@ class Camera
             new ImageSaver.Callback() {
               @Override
               public void onComplete(String absolutePath) {
+                Log.i(TAG, "camerabackground: image saved");
                 dartMessenger.finish(flutterResult, absolutePath);
               }
 
               @Override
               public void onError(String errorCode, String errorMessage) {
+                Log.i(TAG, "camerabackground: image save error");
                 dartMessenger.error(flutterResult, errorCode, errorMessage, null);
               }
             }));
@@ -1302,7 +1311,6 @@ class Camera
     synchronized (captureSessionLock) {
       CameraCaptureSession session = captureSession;
       captureSession = null;
-  
       if (session != null) {
         try {
           Log.i(TAG, "closeCaptureSession");
