@@ -436,7 +436,7 @@ class Camera
 
           @Override
           public void onConfigured(@NonNull CameraCaptureSession session) {
-            Log.i(TAG, "CameraCaptureSession onConfigured");
+            Log.i(TAG, "CameraCaptureSession onConfigured blah log we know will happen");
             // Camera was already closed.
             if (cameraDevice == null || captureSessionClosed) {
               dartMessenger.sendCameraErrorEvent("The camera was closed during configuration.");
