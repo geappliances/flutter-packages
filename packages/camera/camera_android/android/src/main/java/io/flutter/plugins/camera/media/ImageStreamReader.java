@@ -204,7 +204,9 @@ public class ImageStreamReader {
       @NonNull Handler handler) {
     imageReader.setOnImageAvailableListener(
         reader -> {
+          Log.i("ImageStreamReader", "New image available from ImageReader");
           Image image = reader.acquireNextImage();
+          Log.i("ImageStreamReader", "Acquired image: " + image);
           if (image == null) return;
 
           onImageAvailable(image, captureProps, imageStreamSink);
